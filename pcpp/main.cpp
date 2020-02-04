@@ -9,14 +9,45 @@
 #include "header/PlatformSpecificUtils.h"
 
 /*
+* This method returns the Http method as a string
+*/
+std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod)
+{
+    switch (httpMethod)
+    {
+    case pcpp::HttpRequestLayer::HttpGET:
+        return "GET";
+    case pcpp::HttpRequestLayer::HttpPOST:
+        return "POST";
+    default:
+        return "Other";
+    }
+}
+
+/*
 * This is where all the packet parsing will be done
 * Most of the work to be done is in this function
 */
 static void packetCallback(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
 {
-	printf("packet captured\n");
+	//initialize the packet from the raw packet
+	pcpp::Packet parsedPacket(packet);
+	
+	//attempt to get the http layer from the current packet 
+	pcpp::HttpRequestLayer* httpLayer = parsedPacket.getLayerOfType<pcpp::HttpRequestLayer>();
+	//if the http layer exists then print out all the http info
+	if(httpLayer != NULL)
+	{
+		printf("##################################\n");
+		printf("HTTP method: %s\n", printHttpMethod(httpLayer->getFirstLine()->getMethod()).c_str());
+		printf("HTTP URI: %s\n", httpLayer->getFirstLine()->getUri().c_str());
+		printf("HTTP host: %s\n", httpLayer->getFieldByName(PCPP_HTTP_HOST_FIELD)->getFieldValue().c_str());
+		printf("HTTP user-agent: %s\n", httpLayer->getFieldByName(PCPP_HTTP_USER_AGENT_FIELD)->getFieldValue().c_str());
+		printf("HTTP full URL: %s\n", httpLayer->getUrl().c_str());
+		printf("##################################\n");
+	}
 
-
+	
 }
 
 /*
