@@ -19,8 +19,23 @@ std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod)
         return "GET";
     case pcpp::HttpRequestLayer::HttpPOST:
         return "POST";
+    case pcpp::HttpRequestLayer::HttpHEAD:
+	return "HEAD";
+    case pcpp::HttpRequestLayer::HttpPUT:
+	return "PUT";
+    case pcpp::HttpRequestLayer::HttpDELETE:
+	return "DELETE";
+    case pcpp::HttpRequestLayer::HttpTRACE:
+	return "TRACE";
+    case pcpp::HttpRequestLayer::HttpOPTIONS:
+	return "OPTIONS";
+    case pcpp::HttpRequestLayer::HttpCONNECT:
+	return "CONNECT";
+    case pcpp::HttpRequestLayer::HttpPATCH:
+	return "PATCH";
+    case pcpp::HttpRequestLayer::HttpMethodUnknown:
     default:
-        return "Other";
+        return "HTTP METHOD UNKNOWN";
     }
 }
 
