@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <pcap.h>
+#include <string>
 
 static int pktCount = 0;
+
 
 // do somthing with the packet
 void getHTTPRequest(u_char *data, const struct pcap_pkthdr* header, const u_char* packet)
 {
-	//print out when a packet is received for now.
-	++pktCount;	
-	printf("packet captured of length: %d\n", header->len);
+	//print out when a packet is received for now
+	std::string packetS(reinterpret_cast<const char*>(packet));
+	
+	printf("%s\n", packetS);
 }
 
 
@@ -47,7 +50,8 @@ int main(int argc, char *argv[])
 
 	// set the filter
 	pcap_setfilter(handle, &fp);
-
+	
+	printf("listening on %s\n", filter);
 	//loop 10 times using the above function
 	pcap_loop(handle, 20, getHTTPRequest, NULL);	
 
