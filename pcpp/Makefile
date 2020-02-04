@@ -1,4 +1,7 @@
-include /home/ncvncv97/pcapplusplus-19.12-ubuntu-18.04-gcc-7/mk/PcapPlusPlus.mk
+ADRIENNE = /home/adrienne_elise_p/pcapplusplus-19.12-source-linux/PcapPlusPlus/mk/PcapPlusPlus.mk
+NATHAN = /home/ncvncv97/pcapplusplus-19.12-ubuntu-18.04-gcc-7/mk/PcapPlusPlus.mk
+
+include ${ADRIENNE}
 
 # All Target
 all:
