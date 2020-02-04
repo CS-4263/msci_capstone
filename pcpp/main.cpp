@@ -54,6 +54,9 @@ static void packetCallback(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, v
 	if(httpLayer != NULL)
 	{
 		printf("##################################\n");
+		printf("Layer data: %d [bytes]; Layer payload: %d [bytes]\n", 
+				(int)httpLayer->getDataLen(), 
+				(int)httpLayer->getLayerPayloadSize());
 		printf("HTTP method: %s\n", printHttpMethod(httpLayer->getFirstLine()->getMethod()).c_str());
 		printf("HTTP URI: %s\n", httpLayer->getFirstLine()->getUri().c_str());
 		printf("HTTP host: %s\n", httpLayer->getFieldByName(PCPP_HTTP_HOST_FIELD)->getFieldValue().c_str());
