@@ -1,4 +1,5 @@
 #include "stdlib.h"
+#include <string>
 #include "header/Packet.h"
 #include "header/EthLayer.h"
 #include "header/IPv4Layer.h"
@@ -26,19 +27,24 @@ std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod)
 
 /*
 * This is where all the packet parsing will be done
-* Most of the work to be done is in this function
+* Most of the work will be done in this function
 */
-static void packetCallback(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* cookie)
+static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev, void* cookie)
 {
 	//initialize the packet from the raw packet
-	pcpp::Packet parsedPacket(packet);
+	pcpp::Packet parsedPacket(rawPacket);
 	
 	//attempt to get the http layer from the current packet 
 	pcpp::HttpRequestLayer* httpLayer = parsedPacket.getLayerOfType<pcpp::HttpRequestLayer>();
+	
 	//if the http layer exists then print out all the http info
 	if(httpLayer != NULL)
 	{
 		printf("##################################\n");
+		printf("Accept: %s\n", httpLayer->getFieldByName(PCPP_HTTP_ACCEPT_FIELD)->getFieldValue().c_str());
+		printf("accept-language: %s\n", httpLayer->getFieldByName(PCPP_HTTP_ACCEPT_LANGUAGE_FIELD)->getFieldValue().c_str());
+		printf("accept-encoding: %s\n", httpLayer->getFieldByName(PCPP_HTTP_ACCEPT_ENCODING_FIELD)->getFieldValue().c_str());
+		//printf("content length: %s\n", httpLayer->getFieldByName(PCPP_HTTP_CONTENT_LENGTH_FIELD)->getFieldValue().c_str());
 		printf("HTTP method: %s\n", printHttpMethod(httpLayer->getFirstLine()->getMethod()).c_str());
 		printf("HTTP URI: %s\n", httpLayer->getFirstLine()->getUri().c_str());
 		printf("HTTP host: %s\n", httpLayer->getFieldByName(PCPP_HTTP_HOST_FIELD)->getFieldValue().c_str());
@@ -58,6 +64,9 @@ int main(int argc, char* argv[])
 {
 	//IMPORTANT: Change this to your own IP
 	std::string devIP = "10.128.0.3";
+
+	// this is the port to filter by given as a command line arg
+	//int port = std::stoi(argv[1]);
 
 	//initialize device
 	pcpp::PcapLiveDevice* dev = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByIp(devIP.c_str());
