@@ -17,15 +17,31 @@
 */
 std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod)
 {
-	switch (httpMethod)
-	{
-	case pcpp::HttpRequestLayer::HttpGET:
-    		return "GET";
-	case pcpp::HttpRequestLayer::HttpPOST:
-    		return "POST";
-	default:
-    		return "Other";
-	}
+    switch (httpMethod)
+    {
+    case pcpp::HttpRequestLayer::HttpGET:
+        return "GET";
+    case pcpp::HttpRequestLayer::HttpPOST:
+        return "POST";
+    case pcpp::HttpRequestLayer::HttpHEAD:
+	return "HEAD";
+    case pcpp::HttpRequestLayer::HttpPUT:
+	return "PUT";
+    case pcpp::HttpRequestLayer::HttpDELETE:
+	return "DELETE";
+    case pcpp::HttpRequestLayer::HttpTRACE:
+	return "TRACE";
+    case pcpp::HttpRequestLayer::HttpOPTIONS:
+	return "OPTIONS";
+    case pcpp::HttpRequestLayer::HttpCONNECT:
+	return "CONNECT";
+    case pcpp::HttpRequestLayer::HttpPATCH:
+	return "PATCH";
+    case pcpp::HttpRequestLayer::HttpMethodUnknown:
+    default:
+        return "HTTP METHOD UNKNOWN";
+    }
+
 }
 
 /*
@@ -33,17 +49,17 @@ std::string printHttpMethod(pcpp::HttpRequestLayer::HttpMethod httpMethod)
 */
 std::string printHttpVersion(pcpp::HttpVersion httpVersion)
 {
-	switch(httpVersion)
-	{
-	case pcpp::HttpVersion::ZeroDotNine:
-		return "HTTP/0.9";
-	case pcpp::HttpVersion::OneDotZero:
-		return "HTTP/1.0";
-	case pcpp::HttpVersion::OneDotOne:
-		return "HTTP/1.1";
-	default:
-		return "Unknown";
-	}
+        switch(httpVersion)
+        {
+        case pcpp::HttpVersion::ZeroDotNine:
+                return "HTTP/0.9";
+        case pcpp::HttpVersion::OneDotZero:
+                return "HTTP/1.0";
+        case pcpp::HttpVersion::OneDotOne:
+                return "HTTP/1.1";
+        default:
+                return "Unknown";
+        }
 }
 
 /*
@@ -73,6 +89,9 @@ static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev
 		printf("HTTP user-agent: %s\n", httpRequestLayer->getFieldByName(PCPP_HTTP_USER_AGENT_FIELD)->getFieldValue().c_str());
 		printf("HTTP full URL: %s\n", httpRequestLayer->getUrl().c_str());
 		printf("TO String method: %s\n", httpRequestLayer->toString().c_str());
+		printf("Layer data: %d [bytes]; Layer payload: %d [bytes]\n", 
+				(int)httpLayer->getDataLen(), 
+				(int)httpLayer->getLayerPayloadSize());
 		printf("##################################\n");
 	}
 
