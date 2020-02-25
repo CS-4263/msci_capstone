@@ -7,6 +7,7 @@
 #include "header/PcapFileDevice.h"
 #include "header/PcapLiveDeviceList.h"
 #include "header/PlatformSpecificUtils.h"
+#include <iostream>
 
 /*
 * This method returns the Http method as a string
@@ -63,6 +64,13 @@ static void packetCallback(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, v
 		printf("HTTP user-agent: %s\n", httpLayer->getFieldByName(PCPP_HTTP_USER_AGENT_FIELD)->getFieldValue().c_str());
 		printf("HTTP full URL: %s\n", httpLayer->getUrl().c_str());
 		printf("##################################\n");
+
+		// now we are going to store the method
+		std::string str = "curl -X POST \"localhost:9200/packet/_doc?pretty\" -H 'Content-Type: application/json' -d'\n{\n\"method\" : \"";
+		str = str + printHttpMethod(httpLayer->getFirstLine()->getMethod()).c_str() + "\"\n}\n'";
+		const char *command = str.c_str();
+		//sending it to the system
+		system(command);
 	}
 
 	
