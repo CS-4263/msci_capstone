@@ -1,5 +1,8 @@
 ADRIENNE = /home/adrienne_elise_p/pcapplusplus-19.12-source-linux/PcapPlusPlus/mk/PcapPlusPlus.mk
 NATHAN = /home/ncvncv97/pcapplusplus-19.12-ubuntu-18.04-gcc-7/mk/PcapPlusPlus.mk
+JAMES = /home/james/PcapPP/pcapplusplus-19.12-ubuntu-16.04-gcc-5.4.0/mk/PcapPlusPlus.mk
+DEVENDRA = /home/devendraido/pcapplusplus-19.12-source-linux/PcapPlusPlus/mk/PcapPlusPlus.mk
+
 
 include ${ADRIENNE}
 
@@ -11,4 +14,4 @@ all:
 # Clean Target
 clean:
 	rm main.o
-	rm HttpEcho
+	rm HTTPEcho
