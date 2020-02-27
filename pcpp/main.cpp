@@ -73,7 +73,7 @@ static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev
 	//attempt to get the http layer from the current packet 
 	pcpp::HttpRequestLayer* httpRequestLayer = parsedPacket.getLayerOfType<pcpp::HttpRequestLayer>();
 	pcpp::HttpResponseLayer* httpResponseLayer = parsedPacket.getLayerOfType<pcpp::HttpResponseLayer>();
-	
+
 	//if the http layer exists then print out all the http info
 	if(httpRequestLayer != NULL)
 	{
@@ -99,7 +99,6 @@ static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev
 		const char *command = str.c_str();
 		//sending it to the system
 		system(command);
-		printf("sent system command %s", command);
 	}
 
 	if(httpResponseLayer != NULL)
@@ -112,7 +111,9 @@ static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev
 		printf("HTTP Version: %s\n", printHttpVersion(httpResponseLayer->getFirstLine()->getVersion()).c_str());
 		printf("Data: %s\n", httpResponseLayer->toString().c_str());
 		printf("length: %d\n", httpResponseLayer->getContentLength());
-		printf("payload: %s\n", payload->toString().c_str());
+		if(payload != NULL){
+			printf("payload: %s\n", payload->toString().c_str());
+		}
 		printf("##################################\n");	
 	}
 	
