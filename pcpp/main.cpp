@@ -99,7 +99,7 @@ static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev
 		const char *command = str.c_str();
 		//sending it to the system
 		system(command);
-		print("sent system command %s", command);
+		printf("sent system command %s", command);
 	}
 
 	if(httpResponseLayer != NULL)
