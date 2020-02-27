@@ -14,4 +14,4 @@ all:
 # Clean Target
 clean:
 	rm main.o
-	rm HTTPEcho
+	rm HttpEcho
