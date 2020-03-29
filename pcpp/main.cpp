@@ -10,6 +10,7 @@
 #include "header/PcapLiveDeviceList.h"
 #include "header/PlatformSpecificUtils.h"
 #include "header/PayloadLayer.h"
+#include "header/TcpReassembly.h"
 
 /*
 * This returns the Http method as a string
@@ -111,12 +112,15 @@ static void packetCallback(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev
 		printf("HTTP Version: %s\n", printHttpVersion(httpResponseLayer->getFirstLine()->getVersion()).c_str());
 		printf("Data: %s\n", httpResponseLayer->toString().c_str());
 		printf("length: %d\n", httpResponseLayer->getContentLength());
-		if(payload != NULL){
-			printf("payload: %s\n", payload->toString().c_str());
-		}
 		printf("##################################\n");	
 	}
 	
+}
+
+static void onPacketArrives(pcpp::RawPacket* packet, pcpp::PcapLiveDevice* dev, void* tcpReassemblyCookie)
+{
+	pcpp::TcpReassembly* tcpReassembly = (pcpp::TcpReassembly*)tcpReassemblyCookie;
+        tcpReassembly->reassemblePacket(packet);
 }
 
 /*
@@ -163,7 +167,7 @@ int main(int argc, char* argv[])
 	dev->setFilter(filter);
 	
 	//start capture on the device with the packetCallback function
-	dev->startCapture(packetCallback, NULL);
+	dev->startCapture(onPacketArrives, NULL);
 
 	//The main will continue running so make it sleep
 	//while we parse packets in packetCallback
