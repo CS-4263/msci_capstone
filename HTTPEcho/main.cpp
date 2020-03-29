@@ -16,43 +16,28 @@
 
 using namespace pcpp;
 
-#define EXIT_WITH_ERROR(reason, ...) do { \
-	printf("\nError: " reason "\n\n", ## __VA_ARGS__); \
-	exit(1); \
-	} while(0)
-
-
-#if defined(WIN32) || defined(WINx64)
-#define SEPARATOR '\\'
-#else
-#define SEPARATOR '/'
-#endif
-
 
 // unless the user chooses otherwise - default number of concurrent used file descriptors is 500
 #define DEFAULT_MAX_NUMBER_OF_CONCURRENT_OPEN_FILES 500
 
 
 /**
- * A singleton class containing the configuration as requested by the user. This singleton is used throughout the application
+ * This class contains all the flags indicated by the user
  */
 class GlobalConfig
 {
 private:
 
 	/**
-	 * A private c'tor (as this is a singleton)
+	 * A private constructor
 	 */
-	GlobalConfig() { writeMetadata = false; outputDir = ""; writeToConsole = false; separateSides = false; maxOpenFiles = DEFAULT_MAX_NUMBER_OF_CONCURRENT_OPEN_FILES; m_RecentConnsWithActivity = NULL; }
+	GlobalConfig() { outputDir = ""; writeToConsole = false; separateSides = false; maxOpenFiles = DEFAULT_MAX_NUMBER_OF_CONCURRENT_OPEN_FILES; m_RecentConnsWithActivity = NULL; }
 
 	// A least-recently-used (LRU) list of all connections seen so far. Each connection is represented by its flow key. This LRU list is used to decide which connection was seen least
 	// recently in case we reached max number of open file descriptors and we need to decide which files to close
 	LRUList<uint32_t>* m_RecentConnsWithActivity;
 
 public:
-
-	// a flag indicating whether to write a metadata file for each connection (containing several stats)
-	bool writeMetadata;
 
 	// the directory to write files to (default is current directory)
 	std::string outputDir;
@@ -77,7 +62,7 @@ public:
 
 		// if user chooses to write to a directory other than the current directory - add the dir path to the return value
 		if (outputDir != "")
-			stream << outputDir << SEPARATOR;
+			stream << outputDir << '/';
 
 		std::string sourceIP = connData.srcIP->toString();
 		std::string destIP = connData.dstIP->toString();
@@ -138,9 +123,6 @@ public:
 	 */
 	LRUList<uint32_t>* getRecentConnsWithActivity()
 	{
-		// This is a lazy implementation - the instance isn't created until the user requests it for the first time.
-		// the side of the LRU list is determined by the max number of allowed open files at any point in time. Default is DEFAULT_MAX_NUMBER_OF_CONCURRENT_OPEN_FILES
-		// but the user can choose another number
 		if (m_RecentConnsWithActivity == NULL)
 			m_RecentConnsWithActivity = new LRUList<uint32_t>(maxOpenFiles);
 
@@ -159,7 +141,7 @@ public:
 	}
 	
 	/**
-	 * d'tor
+	 * destructor
 	 */
 	~GlobalConfig()
 	{
@@ -188,12 +170,12 @@ struct TcpReassemblyData
 	int bytesFromSide[2];
 
 	/**
-	 * the default c'tor
+	 * the default constructor
 	 */
 	TcpReassemblyData() { fileStreams[0] = NULL; fileStreams[1] = NULL; clear(); }
 
 	/**
-	 * The default d'tor
+	 * destructor
 	 */
 	~TcpReassemblyData()
 	{
@@ -359,24 +341,6 @@ static void tcpReassemblyConnectionEndCallback(const ConnectionData& connectionD
 	if (iter == connMgr->end())
 		return;
 
-	// write a metadata file if required by the user
-	if (GlobalConfig::getInstance().writeMetadata)
-	{
-		std::string fileName = GlobalConfig::getInstance().getFileName(connectionData, 0, false) + "-metadata.txt";
-		std::ofstream metadataFile(fileName.c_str());
-		metadataFile << "Number of data packets in side 0:  " << iter->second.numOfDataPackets[0] << std::endl;
-		metadataFile << "Number of data packets in side 1:  " << iter->second.numOfDataPackets[1] << std::endl;
-		metadataFile << "Total number of data packets:      " << (iter->second.numOfDataPackets[0] + iter->second.numOfDataPackets[1]) << std::endl;
-		metadataFile << std::endl;
-		metadataFile << "Number of bytes in side 0:         " << iter->second.bytesFromSide[0] << std::endl;
-		metadataFile << "Number of bytes in side 1:         " << iter->second.bytesFromSide[1] << std::endl;
-		metadataFile << "Total number of bytes:             " << (iter->second.bytesFromSide[0] + iter->second.bytesFromSide[1]) << std::endl;
-		metadataFile << std::endl;
-		metadataFile << "Number of messages in side 0:      " << iter->second.numOfMessagesFromSide[0] << std::endl;
-		metadataFile << "Number of messages in side 1:      " << iter->second.numOfMessagesFromSide[1] << std::endl;
-		metadataFile.close();
-	}
-
 	// remove the connection from the connection manager
 	connMgr->erase(iter);
 }
@@ -401,7 +365,6 @@ static void onPacketArrives(RawPacket* packet, PcapLiveDevice* dev, void* tcpRea
 	TcpReassembly* tcpReassembly = (TcpReassembly*)tcpReassemblyCookie;
 	tcpReassembly->reassemblePacket(packet);
 }
-
 
 
 /**
@@ -474,23 +437,14 @@ int main(int argc, char* argv[])
 	//set the filter on the device to the filter we just created
 	dev->setFilter(filter);
 
-	AppName::init(argc, argv);
-
-	std::string interfaceNameOrIP = "";
 	std::string inputPcapFileName = "";
-	std::string bpfFilter = "";
 	std::string outputDir = "";
-	bool writeMetadata = false;
 	bool writeToConsole = true;
 	bool separateSides = false;
 	size_t maxOpenFiles = DEFAULT_MAX_NUMBER_OF_CONCURRENT_OPEN_FILES;
-
-	
-
 	
 	// set global config singleton with input configuration
 	GlobalConfig::getInstance().outputDir = outputDir;
-	GlobalConfig::getInstance().writeMetadata = writeMetadata;
 	GlobalConfig::getInstance().writeToConsole = writeToConsole;
 	GlobalConfig::getInstance().separateSides = separateSides;
 	GlobalConfig::getInstance().maxOpenFiles = maxOpenFiles;
@@ -502,6 +456,5 @@ int main(int argc, char* argv[])
 	TcpReassembly tcpReassembly(tcpReassemblyMsgReadyCallback, &connMgr, tcpReassemblyConnectionStartCallback, tcpReassemblyConnectionEndCallback);
 
 	// start capturing packets and do TCP reassembly
-	liveTcpReassembly(dev, tcpReassembly);
-	
+	liveTcpReassembly(dev, tcpReassembly);	
 }
