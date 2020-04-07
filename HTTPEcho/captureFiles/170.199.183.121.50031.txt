@@ -1,0 +1,30 @@
+GET /test/ HTTP/1.1
+Host: 34.66.113.151
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Referer: http://34.66.113.151/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+
+HTTP/1.0 200 OK
+Server: SimpleHTTP/0.6 Python/3.6.9
+Date: Tue, 07 Apr 2020 22:33:45 GMT
+Content-type: text/html; charset=utf-8
+Content-Length: 307
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Directory listing for /test/</title>
+</head>
+<body>
+<h1>Directory listing for /test/</h1>
+<hr>
+<ul>
+</ul>
+<hr>
+</body>
+</html>

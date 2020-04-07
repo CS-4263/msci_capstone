@@ -39,13 +39,13 @@ private:
 
 public:
 
-	// the directory to write files to (default is current directory)
+	// the directory to write files to
 	std::string outputDir;
 
 	// a flag indicating whether to write TCP data to actual files or to console
 	bool writeToConsole;
 
-	// a flag indicating whether to write both side of a connection to the same file (which is the default) or write each side to a separate file
+	// a flag indicating whether to write both sides of a connection to the same file (which is the default) or write each side to a separate file
 	bool separateSides;
 
 	// max number of allowed open files in each point in time
@@ -65,18 +65,13 @@ public:
 			stream << outputDir << '/';
 
 		std::string sourceIP = connData.srcIP->toString();
-		std::string destIP = connData.dstIP->toString();
-
+		
 		// for IPv6 addresses, replace ':' with '_'
 		std::replace(sourceIP.begin(), sourceIP.end(), ':', '_');
-		std::replace(destIP.begin(), destIP.end(), ':', '_');
-
+		
 		// side == 0 means data is sent from client->server
-		if (side <= 0 || separareSides == false)
-			stream << sourceIP << "." << connData.srcPort << "-" << destIP << "." << connData.dstPort;
-		else // side == 1 means data is sent from server->client
-			stream << destIP << "." << connData.dstPort << "-" << sourceIP << "." << connData.srcPort;
-
+		stream << sourceIP << "." << connData.srcPort ;
+		
 		// return the file path
 		return stream.str();
 	}
@@ -92,7 +87,7 @@ public:
 		if (writeToConsole)
 			return &std::cout;
 
-		// open the file on the disk (with append or overwrite mode)
+		// open the file on the disk
 		if (reopen)
 			return new std::ofstream(fileName.c_str(), std::ios_base::binary | std::ios_base::app);
 		else
@@ -326,8 +321,7 @@ static void tcpReassemblyConnectionStartCallback(const ConnectionData& connectio
 
 
 /**
- * The callback being called by the TCP reassembly module whenever a connection is ending. This method removes the connection from the connection manager and writes the metadata file if requested
- * by the user
+ * The callback being called by the TCP reassembly module whenever a connection is ending.
  */
 static void tcpReassemblyConnectionEndCallback(const ConnectionData& connectionData, TcpReassembly::ConnectionEndReason reason, void* userCookie)
 {
@@ -337,7 +331,7 @@ static void tcpReassemblyConnectionEndCallback(const ConnectionData& connectionD
 	// find the connection in the connection manager by the flow key
 	TcpReassemblyConnMgrIter iter = connMgr->find(connectionData.flowKey);
 
-	// connection wasn't found - shouldn't get here
+	// connection wasn't found
 	if (iter == connMgr->end())
 		return;
 
@@ -357,7 +351,7 @@ static void onApplicationInterrupted(void* cookie)
 
 
 /**
- * packet capture callback - called whenever a packet arrives on the live device (in live device capturing mode)
+ * packet capture callback - called whenever a packet arrives on the live device
  */
 static void onPacketArrives(RawPacket* packet, PcapLiveDevice* dev, void* tcpReassemblyCookie)
 {
@@ -398,7 +392,7 @@ void liveTcpReassembly(PcapLiveDevice* dev, TcpReassembly& tcpReassembly)
 
 
 /**
- * main method of this utility
+ * main method 
  */
 int main(int argc, char* argv[])
 {
@@ -437,13 +431,14 @@ int main(int argc, char* argv[])
 	//set the filter on the device to the filter we just created
 	dev->setFilter(filter);
 
+	//outputDir and writeToConsole are both for writing to file instead of outputting to console
 	std::string inputPcapFileName = "";
-	std::string outputDir = "";
-	bool writeToConsole = true;
+	std::string outputDir = "captureFiles";
+	bool writeToConsole = false;
 	bool separateSides = false;
 	size_t maxOpenFiles = DEFAULT_MAX_NUMBER_OF_CONCURRENT_OPEN_FILES;
 	
-	// set global config singleton with input configuration
+	// set global config
 	GlobalConfig::getInstance().outputDir = outputDir;
 	GlobalConfig::getInstance().writeToConsole = writeToConsole;
 	GlobalConfig::getInstance().separateSides = separateSides;
